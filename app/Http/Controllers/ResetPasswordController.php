@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Actions\Fortify\PasswordValidationRules;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class ResetPasswordController extends Controller
 {
@@ -46,23 +47,21 @@ class ResetPasswordController extends Controller
         }
     }
 
-    public function updatePassword(Request $request)
-{
-    $request->validate([
-        'email' => 'required|email|exists:users,email',
-        'password' => $this->passwordRules(),
-        'token' => 'required',
-   ]);
-    $record = ResetPassword::where('email', $request->email)->first();
-    $user = User::where('email', $request->email)->first();
-
-    if ($record && $request->token == $record->token && $user) {
-        $user->password = Hash::make($request->password);
-        return redirect('/');
-    } else {
-        return 'error';
+    public function updatePassword(Request $request) {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'password' => $this->passwordRules(),
+            'token' => 'required',
+        ]);
+        $record = ResetPassword::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
+        if ($record && $request->token == $record->token && $user) {
+            $user->password = Hash::make($request->password);
+            $user->save();
+            return redirect('/')->with('status', 'Password has been updated.');
+        } else {
+            return redirect()->back()->withErrors(['error' => 'Invalid token or email.']);
+        }
     }
-}
-
 }
 //Y94FV3@jcW9q

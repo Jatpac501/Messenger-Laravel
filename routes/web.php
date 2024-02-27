@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,4 +42,12 @@ Route::post('/reset-password/{email}/update', [ResetPasswordController::class,'u
 
 Route::get('/test/cropper', function () {
     return Inertia::render('Test/CropProfilePhoto');
+});
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/chats', [ChatController::class,'index'])->name('chats');
 });
