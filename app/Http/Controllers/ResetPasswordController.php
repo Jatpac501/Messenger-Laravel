@@ -4,14 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Mail\ResetPasswordMail;
-use Illuminate\Support\Facades\Mail;
 use App\Models\ResetPassword;
 use Illuminate\Support\Facades\Hash;
 use App\Actions\Fortify\PasswordValidationRules;
-use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
 
 class ResetPasswordController extends Controller
 {

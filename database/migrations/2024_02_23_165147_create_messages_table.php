@@ -13,10 +13,17 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->unsigned();
-            $table->string('message', 4096);
-            $table->string('message_photo_path', 2048)->nullable();
+            $table->unsignedBigInteger('from_user_id');
+            $table->unsignedBigInteger('to_user_id');
+            $table->text('text');
+            $table->string('photo_path', 2048)->nullable();
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
+
+            $table->foreign('from_user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('to_user_id')->references('id')->on('users')->onDelete('cascade');
+
+            $table->index(['from_user_id', 'to_user_id']);
         });
     }
 
