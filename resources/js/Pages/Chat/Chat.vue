@@ -3,16 +3,16 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import moment from 'moment';
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 const socket = io('http://localhost:3000');
+
+// Заменить moment на day.js или date-fns
 
 const props = defineProps({
     messages: Array,
     users: Object,
     users_id: Object,
 });
-const senderId = ref(props.users_id.sender_id);
-const recipientId = ref(props.users_id.recipient_id);
 
 const messages = ref(props.messages || []);
 const messageText = ref('');
@@ -38,8 +38,9 @@ const scrollToLastMessage = () => {
     const messagesContainer = document.querySelector('#messages').querySelectorAll('.message');
     //Заделка под скролл до ласт непросмотренного (<div class="message"/>)
     const lastMessages = messagesContainer[messagesContainer.length-1];
-    lastMessages.scrollIntoView({behavior: 'smooth', block: "end"});
+    lastMessages?.scrollIntoView({behavior: 'smooth', block: "end"});
 };
+
 
 socket.on('message-saved', (messageWithId) => {
     const index = messages.value.findIndex(m => m.tempId === messageWithId.tempId);
@@ -73,7 +74,7 @@ const markMessageAsRead = (messageId) => {
 };
 
 const observer = new IntersectionObserver(
-    (entries, observer) => {
+    (entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const message = entry.target.getAttribute('data-id');
@@ -82,10 +83,7 @@ const observer = new IntersectionObserver(
             }
         });
     },
-    {
-        root: null,
-        threshold: 0.8
-    }
+    {root: null,threshold: 0.8}
 );
 
 onMounted(() => {
@@ -97,7 +95,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-    observer.disconnect();
+    observer?.disconnect();
 });
 
 </script>
@@ -111,7 +109,7 @@ onUnmounted(() => {
         </template>
         <div class="py-6">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 ">
-                <div id="messages" class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg h-[70vh] overflow-y-scroll">
+                <div id="messages" class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg h-[70vh] overflow-y-scroll px-2">
                     <div
                         class="p-4 overflow-hidden flex flex-row"
                         :class="{ 'viewed': message.read_at }"
@@ -127,7 +125,7 @@ onUnmounted(() => {
                             class="h-10 w-10 rounded-full mr-2"
                         />
                         <div class="flex flex-col message whitespace-pre-wrap text-pretty">
-                            <div class="text-blue-500 font-semibold message_name">{{ message.from_user_id === senderId ? props.users.sender : props.users.recipient }}</div>
+                            <div class="text-blue-500 font-semibold message_name">{{ message.from_user_id === props.users_id.sender_id ? props.users.sender : props.users.recipient }}</div>
                             <div class="text-slate-400 text-sm message_date">{{ moment(message.created_at).utcOffset(240).format('MMMM Do, h:mm a') }}</div>
                             <div class="text-white message-text col-span-2 message" :class=" {'my-message': message.from_user_id === props.sender_id}">{{ message.text }}</div>
                             <div v-if="message.read_at" class="text-slate-400 text-xs text-smread-receipt">viewed</div>
