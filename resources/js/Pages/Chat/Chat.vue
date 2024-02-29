@@ -30,12 +30,13 @@ const sendMessage = () => {
         socket.emit('send-message', msg);
         messages.value.push({ ...msg, id: tempId });
         messageText.value = '';
-        nextTick(() => scrollToLastMessage());
     }
+    nextTick(() => scrollToLastMessage());
 };
 
 const scrollToLastMessage = () => {
     const messagesContainer = document.querySelector('#messages').querySelectorAll('.message');
+    //Заделка под скролл до ласт непросмотренного (<div class="message"/>)
     const lastMessages = messagesContainer[messagesContainer.length-1];
     lastMessages.scrollIntoView({behavior: 'smooth', block: "end"});
 };
@@ -52,6 +53,7 @@ socket.on('receive-message', (message) => {
     nextTick(() => {
         const element = document.querySelector(`#message-${message.id}`);
         if (!element.classList.contains('viewed')) observer.observe(element);
+        scrollToLastMessage();
     });
 });
 socket.on('read-message', (readMessageInfo) => {
@@ -107,9 +109,9 @@ onUnmounted(() => {
                 {{ props.users.recipient }}
             </h2>
         </template>
-        <div class="py-6 ">
+        <div class="py-6">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 ">
-                <div id="messages" class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-2 h-[70vh] overflow-y-scroll">
+                <div id="messages" class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg h-[70vh] overflow-y-scroll">
                     <div
                         class="p-4 overflow-hidden flex flex-row"
                         :class="{ 'viewed': message.read_at }"
@@ -131,6 +133,7 @@ onUnmounted(() => {
                             <div v-if="message.read_at" class="text-slate-400 text-xs text-smread-receipt">viewed</div>
                         </div>
                     </div>
+                    <KOCTblLb class="message"/>
                 </div>
             </div>
         </div>
