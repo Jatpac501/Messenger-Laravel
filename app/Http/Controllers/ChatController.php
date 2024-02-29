@@ -42,15 +42,20 @@ class ChatController extends Controller
 
     }
     public function store(Request $request) {
-
-        $message = Message::create([
-            'from_user_id' => $request->from_user_id,
-            'to_user_id' => $request->to_user_id,
-            'text' => Crypt::encryptString($request->text),
-            'read_at' => null,
+        $validatedData = $request->validate([
+            'from_user_id' => 'required',
+            'to_user_id' => 'required',
+            'text' => 'required|string',
         ]);
+        $encryptedText = Crypt::encryptString($request->text);
+        $message = new Message([
+            'from_user_id' => $validatedData['from_user_id'],
+            'to_user_id' => $validatedData['to_user_id'],
+            'text' => $encryptedText,
+        ]);
+        $message->save();
 
-        return response()->json($message, 201);
+        return response()->json(['messageId' => $message->id], 201);
     }
 
     public function markAsRead(Request $request) {

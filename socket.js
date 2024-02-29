@@ -11,29 +11,26 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
     socket.on('send-message', (message) => {
-        socket.broadcast.emit('receive-message', message);
-        console.log('message received:', message);
         axios.post('http://127.0.0.1:8000/api/chats', message)
             .then(response => {
-                console.log('Message saved');
+                const messageWithId = { ...message, id: response.data.messageId };
+                socket.emit('message-saved', messageWithId);
+                socket.broadcast.emit('receive-message', messageWithId);
             })
             .catch(error => {
-                console.log('Error saving message', error);
             });
     });
     socket.on('receive-message', (message) => {
         console.log('message get:', message);
     });
-    socket.on('disconnect', () => {
-    });
-    socket.on('read-message', (messageId) => {
+    socket.on('markAsRead-message', (messageId) => {
+        socket.emit('read-message', messageId);
+        socket.broadcast.emit('read-message', messageId);
         console.log(messageId);
         axios.post('http://127.0.0.1:8000/api/markAsRead', messageId)
         .then(response => {
-            console.log('Message read');
         })
         .catch(error => {
-            console.log('Error read message', error);
         });
     });
 });
