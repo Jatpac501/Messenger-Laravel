@@ -21,12 +21,10 @@ io.on('connection', (socket) => {
             });
     });
     socket.on('receive-message', (message) => {
-        console.log('message get:', message);
     });
     socket.on('markAsRead-message', (messageId) => {
         socket.emit('read-message', messageId);
         socket.broadcast.emit('read-message', messageId);
-        console.log(messageId);
         axios.post('http://127.0.0.1:8000/api/markAsRead', messageId)
         .then(response => {
         })

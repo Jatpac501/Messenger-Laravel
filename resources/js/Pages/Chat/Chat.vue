@@ -70,7 +70,7 @@ const markMessageAsRead = (messageId) => {
             to_user_id: props.users_id.recipient_id,
             read_at: moment().utcOffset(240).format('LLL'),
     };
-    socket.emit('markAsRead-message', msg);
+    if (msg.to_user_id === props.users_id.sender_id) socket.emit('markAsRead-message', msg);
 };
 
 const observer = new IntersectionObserver(
@@ -89,7 +89,7 @@ const observer = new IntersectionObserver(
 onMounted(() => {
     messages.value.forEach((message) => {
         const element = document.querySelector(`#message-${message.id}`);
-        if (!element.classList.contains('viewed')) observer.observe(element);
+        if (!element.classList.contains('viewed') || !element.classList.contains('my-message')) observer.observe(element);
     });
     nextTick(() => scrollToLastMessage());
 });
@@ -97,7 +97,6 @@ onMounted(() => {
 onUnmounted(() => {
     observer?.disconnect();
 });
-
 </script>
 
 <template>
@@ -111,16 +110,18 @@ onUnmounted(() => {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 ">
                 <div id="messages" class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg h-[70vh] overflow-y-scroll px-2">
                     <div
-                        class="p-4 overflow-hidden flex flex-row"
-                        :class="{ 'viewed': message.read_at }"
                         v-for="message in messages"
+                        class="p-4 overflow-hidden flex flex-row"
+                        :class="{
+                            'viewed': message.read_at,
+                            'my-message': message.from_user_id === props.users_id.sender_id
+                        }"
                         :key="message.id"
                         :id="`message-${message.id}`"
                         :data-id="message.id"
                     >
                         <img
-                            v-if="props.users.sender_photo"
-                            :src="'/storage/' + props.users.sender_photo"
+                            :src="message.from_user_id === props.users_id.sender_id ? '/storage/' + props.users.sender_photo : '/storage/' + props.users.recipient_photo"
                             alt="Avatar"
                             class="h-10 w-10 rounded-full mr-2"
                         />
@@ -145,27 +146,3 @@ onUnmounted(() => {
     </AppLayout>
 </template>
 
-<style>
-.message {
-    max-width: 70%;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
-::-webkit-scrollbar {
-width: 12px;
-}
-
-::-webkit-scrollbar-track {
-background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-background: rgba(136, 136, 136, .5);
-border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-background: #555;
-border-radius: 10px;
-}
-</style>

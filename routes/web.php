@@ -51,3 +51,12 @@ Route::middleware([
 ])->group(function () {
     Route::get('/chats', [ChatController::class,'index'])->name('chats');
 });
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/chats', [ChatController::class,'index'])->name('chats');
+    Route::get('/chat', [ChatController::class,'show'])->name('chat');
+});

@@ -25,6 +25,8 @@ const switchToTeam = (team) => {
 const logout = () => {
     router.post(route('logout'));
 };
+
+
 </script>
 
 <template>
@@ -120,7 +122,6 @@ const logout = () => {
                                         <button v-if="$page.props.jetstream.managesProfilePhotos" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
                                             <img class="h-8 w-8 rounded-full object-cover" :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name">
                                         </button>
-
                                         <span v-else class="inline-flex rounded-md">
                                             <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
                                                 {{ $page.props.auth.user.name }}
@@ -130,13 +131,13 @@ const logout = () => {
                                                 </svg>
                                             </button>
                                         </span>
+
                                     </template>
 
                                     <template #content>
                                         <!-- Account Management -->
-                                        <div class="block px-4 py-2 text-xs text-gray-400">
-                                            Manage Account
-                                        </div>
+
+                                        <div class="block px-4 py-2 text-sm text-gray-400">ID: {{ $page.props.auth.user.id }}</div>
 
                                         <DropdownLink :href="route('profile.show')">
                                             Profile
@@ -287,3 +288,27 @@ const logout = () => {
         </div>
     </div>
 </template>
+<style>
+.message {
+    max-width: 70%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+::-webkit-scrollbar {
+width: 12px;
+}
+
+::-webkit-scrollbar-track {
+background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+background: rgba(136, 136, 136, .5);
+border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+background: #555;
+border-radius: 10px;
+}
+</style>

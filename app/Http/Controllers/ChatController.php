@@ -11,15 +11,33 @@ use Illuminate\Support\Facades\Crypt;
 
 class ChatController extends Controller
 {
+
     public function index() {
+        $user = Auth::user();
+        $messages = Message::where('from_user_id', $user->id)->orWhere('to_user_id', $user->id)->orderBy('created_at', 'asc')->get()->map(function ($message) {
+            $message->text = Crypt::decryptString($message->text);
+            return $message;
+        });
+        $chats = $messages->groupBy(function ($message) use ($user) {
+            return $message->from_user_id === $user->id ? $message->to_user_id : $message->from_user_id;
+        });
+        $users = User::whereIn('id', $chats->keys()->all())->get();
+        return Inertia::render('Chat/ListChats', [
+            'user'=> $user,
+            'listChats'=> $chats,
+            'users'=> $users,
+        ]);
+    }
+    public function show(Request $request) {
+        $recipient = User::where('id', $request->id)->first();
         $users = array(
             'sender' => Auth::user()->name,
             'sender_photo' => Auth::user()->profile_photo_path,
-            'recipient' => Auth::user()->name,
-            'recipient_photo' => Auth::user()->profile_photo_path,
+            'recipient' => $recipient->name,
+            'recipient_photo' => $recipient->profile_photo_path,
         );
         $sender_id = Auth::user()->id;
-        $recipient_id = Auth::user()->id;
+        $recipient_id = $recipient->id;
 
         $messages = Message::where(function ($query) use ($sender_id, $recipient_id) {
             $query->where('from_user_id', $sender_id)
@@ -29,14 +47,12 @@ class ChatController extends Controller
                   ->where('to_user_id', $sender_id);
         })
         ->orderBy('created_at', 'asc')->get()->map(function ($message) {
-                $message->text = Crypt::decryptString($message->text);
-                return $message;
-            });
+            $message->text = Crypt::decryptString($message->text);
+            return $message;
+        });
         return Inertia::render('Chat/Chat', [
             'users' => $users,
-            'users_id' => array('sender_id' => $sender_id,
-                                'recipient_id' => $recipient_id,
-                            ),
+            'users_id' => array('sender_id' => $sender_id, 'recipient_id' => $recipient_id),
             'messages' => $messages,
         ]);
 
