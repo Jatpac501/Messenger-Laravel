@@ -40,8 +40,8 @@ Route::post('/reset-password-code', [ResetPasswordController::class,'sendMail'])
 Route::post('/reset-password/{email}', [ResetPasswordController::class,'checkCode'])->middleware('guest')->name('password.check');
 Route::post('/reset-password/{email}/update', [ResetPasswordController::class,'updatePassword'])->middleware('guest')->name('password.update');
 
-Route::get('/test/cropper', function () {
-    return Inertia::render('Test/CropProfilePhoto');
+Route::get('/test', function () {
+    return Inertia::render('Test/Tester');
 });
 
 Route::middleware([

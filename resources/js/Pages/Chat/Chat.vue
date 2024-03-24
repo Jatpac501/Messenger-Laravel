@@ -16,6 +16,7 @@ const props = defineProps({
 
 const messages = ref(props.messages || []);
 const messageText = ref('');
+const photo = ref(null);
 
 const sendMessage = () => {
     if (messageText.value.trim() !== '') {
